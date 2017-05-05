@@ -27,7 +27,7 @@ class FSM {
 	 * @param state
 	 */
 	changeState(state) {
-		if (!this.states[state]){
+		if (!this.states[state]) {
 			throw Error('State doesn\'t exist');
 		}
 		this.prevStates.push(this.activeStateName);
@@ -42,8 +42,8 @@ class FSM {
 	trigger(event) {
 		var currentState = this.states[this.activeStateName],
 			newStateName = currentState.transitions[event];
-		
-		if (!newStateName){
+
+		if (!newStateName) {
 			throw Error('Event doesn\'t exist');
 		}
 		this.changeState(newStateName);
@@ -66,15 +66,15 @@ class FSM {
 		var allStates = Object.keys(this.states),
 			possibleStates,
 			that = this;
-		
+
 		if (!event) {
 			possibleStates = allStates;
 		} else {
-			possibleStates = allStates.filter(function(stateName) {
+			possibleStates = allStates.filter(function (stateName) {
 				return that.states[stateName].transitions[event];
 			});
 		}
-		
+
 		return possibleStates;
 	}
 
@@ -86,14 +86,14 @@ class FSM {
 	undo() {
 		var result = false,
 			state;
-		
+
 		if (this.prevStates.length) {
-			state = this.prevStates.pop();
+			this.nextStates.push(this.activeStateName);
+            state = this.prevStates.pop();
 			this.activeStateName = state;
-			this.nextStates.push(state);
 			result = true;
 		}
-		
+
 		return result;
 	}
 
@@ -105,21 +105,23 @@ class FSM {
 	redo() {
 		var result = false,
 			state;
-		
+
 		if (this.nextStates.length) {
+			this.prevStates.push(this.activeStateName);
 			state = this.nextStates.pop();
 			this.activeStateName = state;
-			this.prevStates.push(state);
 			result = true;
 		}
-		
 		return result;
 	}
 
 	/**
 	 * Clears transition history
 	 */
-	clearHistory() {}
+	clearHistory() {
+		this.nextStates = [];
+		this.prevStates = [];
+	}
 }
 
 module.exports = FSM;
